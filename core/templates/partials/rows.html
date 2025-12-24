@@ -1,0 +1,21 @@
+{% for pf in listings %}
+<tr class="hover:bg-white/5 transition-colors group cursor-default animate-fade-in">
+    <td class="dc p-4 text-yellow-500 font-bold tracking-wide text-xs">
+        {{ pf.datacenter }}
+    </td>
+    <td class="desc p-4 text-gray-300 group-hover:text-white transition-colors leading-relaxed text-xs md:text-sm">
+        <span class="text-[#fd5d8d] font-bold mr-2 opacity-70">[{{ pf.duty }}]</span> 
+        {{ pf.description }}
+    </td>
+    <td class="creator p-4 text-cyan-400 text-right font-medium truncate text-xs">
+        {{ pf.creator }}
+    </td>
+</tr>
+{% empty %}
+<tr><td colspan="3" class="p-20 text-center text-gray-600 italic font-mono text-xs">NO PARTIES FOUND.</td></tr>
+{% endfor %}
+
+<style>
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+</style>

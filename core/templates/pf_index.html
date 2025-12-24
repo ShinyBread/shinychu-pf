@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ raid_name }} Finder{% endblock %}
+
+{% block extra_css %}
+<script src="//cdnjs.cloudflare.com/ajax/libs/list.js/2.3.1/list.min.js"></script>
+<style>
+    .htmx-indicator {
+        opacity: 0;
+        transition: opacity 200ms ease-in;
+        pointer-events: none;
+    }
+    .htmx-request .htmx-indicator {
+        opacity: 1;
+        pointer-events: all;
+    }
+    .htmx-request.htmx-indicator {
+        opacity: 1;
+        pointer-events: all;
+    }
+
+    /* Scrollbar invisible pero funcional */
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="scanlines"></div>
+<div class="noise"></div>
+
+<div class="fixed inset-0 w-full h-full z-0">
+    <img src="{% static 'img/'|add:raid_slug|add:'.jpg' %}" 
+         class="w-full h-full object-cover opacity-20 blur-sm scale-110"
+         style="view-transition-name: img-{{ raid_slug }};">
+</div>
+
+<div class="relative w-full h-screen overflow-hidden flex flex-col items-center z-10 font-sans">
+
+    <div class="w-full max-w-[1400px] mt-6 mb-4 px-4 flex items-center justify-between">
+        <a href="{% url 'home' %}" class="px-6 py-2 rounded-full border border-white/10 bg-black/40 backdrop-blur-md text-white hover:bg-white hover:text-black transition-all uppercase text-xs flex items-center gap-2 group">
+            <span class="group-hover:-translate-x-1 transition-transform">←</span> Return
+        </a>
+        
+        <h1 class="text-xl md:text-3xl font-bold text-white tracking-widest retro-text-shadow text-right">
+            {{ raid_name }}
+        </h1>
+    </div>
+
+    <div class="w-full max-w-[1400px] flex-1 overflow-hidden flex flex-col mx-4 mb-6 rounded-3xl border border-white/10 bg-black/30 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] relative" id="pf-system">
+        
+        {% if error %}
+            <div class="flex-1 flex items-center justify-center p-8">
+                 <div class="border border-red-500/30 bg-red-900/10 p-8 rounded-2xl text-center backdrop-blur-md">
+                    <h2 class="text-red-400 font-bold mb-2 tracking-widest uppercase">Signal Lost</h2>
+                    <p class="text-gray-400 text-sm ">{{ error }}</p>
+                 </div>
+            </div>
+        {% else %}
+            
+            <div class="p-4 border-b border-white/5 flex flex-col md:flex-row gap-4 bg-white/5 items-center z-20 relative">
+                <div class="relative flex-1 w-full">
+                    <input class="search w-full bg-black/40 border border-white/10 text-white p-3 pl-10 rounded-xl  text-sm focus:outline-none focus:border-[#fd5d8d]/50 focus:bg-black/60 transition-all placeholder-gray-500 uppercase" placeholder="Search description or creator..." />
+                    
+                </div>
+                
+                <div class="relative">
+                    <select id="dc-filter" class="w-full bg-[#2b52ff]/10 text-[#2b52ff] border border-[#2b52ff]/30 py-3 pl-4 pr-10 rounded-xl font-bold uppercase cursor-pointer hover:bg-[#2b52ff] hover:text-white hover:border-transparent transition-all focus:outline-none text-xs tracking-wider appearance-none text-left shadow-lg">
+                        <option value="" class="bg-[#0a0015] text-white">ALL NA DATACENTERS</option>
+                        <option value="Aether" class="bg-[#0a0015] text-white">Aether</option>
+                        <option value="Primal" class="bg-[#0a0015] text-white">Primal</option>
+                        <option value="Crystal" class="bg-[#0a0015] text-white">Crystal</option>
+                        <option value="Dynamis" class="bg-[#0a0015] text-white">Dynamis</option>
+                    </select>
+                    
+                    <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-[#2b52ff]">
+                        <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20">
+                            <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" fill-rule="evenodd"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex-1 overflow-y-auto custom-scrollbar relative">
+                
+                <table class="w-full text-left border-collapse">
+                    <thead class="sticky top-0 bg-black/60 text-gray-500 text-[0.65rem] uppercase tracking-widest backdrop-blur-md z-10 font-bold">
+                        <tr>
+                            <th class="p-4 w-32">Data Center</th>
+                            <th class="p-4">Duty Description</th>
+                            <th class="p-4 w-48 text-right">Party Leader</th>
+                        </tr>
+                    </thead>
+                    
+                    <tbody class="list text-sm text-white divide-y divide-white/5"
+                           id="table-body"
+                           hx-get="{% url 'pf_results' raid_slug %}"
+                           hx-trigger="load"
+                           hx-indicator="#loading-spinner">
+                           
+                           </tbody>
+                </table>
+
+                <div id="loading-spinner" class="htmx-indicator absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50">
+                    <div class="flex flex-col items-center p-8 rounded-2xl border border-white/10 bg-black/80 shadow-[0_0_50px_rgba(253,93,141,0.2)]">
+                        <div class="w-16 h-16 border-4 border-[#fd5d8d]/30 border-t-[#fd5d8d] rounded-full animate-spin mb-6"></div>
+                        
+                        <h3 class="text-[#fd5d8d] font-bold tracking-widest text-sm animate-pulse mb-2">SCANNING...</h3>
+                        <p class="text-xs text-gray-500 ">Loading...</p>
+                    </div>
+                </div>
+
+            </div>
+            
+            <div class="p-3 text-center border-t border-white/5 bg-black/20 backdrop-blur-sm z-20 relative">
+                <p class="text-[0.6rem] text-gray-600 tracking-wider">
+                    DATA SOURCE XIVPF.COM/LISTING
+                </p>
+            </div>
+
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+
+    document.body.addEventListener('htmx:afterSwap', function(evt) {
+        
+        var options = { valueNames: [ 'dc', 'desc', 'creator' ] };
+        var pfList = new List('pf-system', options);
+
+        var dcFilter = document.getElementById('dc-filter');
+        
+        var newDcFilter = dcFilter.cloneNode(true);
+        dcFilter.parentNode.replaceChild(newDcFilter, dcFilter);
+        
+        newDcFilter.addEventListener('change', function() {
+            var selectedDC = this.value;
+            if (selectedDC === "") {
+                pfList.filter();
+            } else {
+                pfList.filter(function(item) {
+                    return item.values().dc.trim() === selectedDC;
+                });
+            }
+        });
+
+        console.log("System Ready: Data loaded and List.js initialized.");
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}404 - Duty Failed{% endblock %}
+
+{% block content %}
+<div class="scanlines"></div>
+<div class="noise"></div>
+
+<div class="min-h-screen w-full flex flex-col items-center justify-center p-4 relative z-10 text-center">
+
+    <div class="absolute w-64 h-64 bg-red-500/20 rounded-full blur-[100px] pointer-events-none"></div>
+
+    <h1 class="text-9xl font-bold text-transparent bg-clip-text bg-gradient-to-b from-red-400 to-red-600 retro-shadow mb-4">
+        404
+    </h1>
+
+    <h2 class="text-2xl md:text-3xl text-white font-bold tracking-widest uppercase mb-2">
+        Duty Failed
+    </h2>
+    <p class="text-gray-400 text-sm md:text-base font-mono mb-8 max-w-md">
+        The page you are looking does not exist.
+    </p>
+
+    <a href="{% url 'home' %}" class="px-8 py-3 rounded-full border border-white/20 bg-white/5 backdrop-blur-md text-white hover:bg-white hover:text-black transition-all font-bold uppercase tracking-wider text-sm flex items-center gap-2 group">
+        <span class="group-hover:-translate-x-1 transition-transform">←</span> Return
+    </a>
+
+</div>
+{% endblock %}
