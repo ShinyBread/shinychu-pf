@@ -26,7 +26,11 @@ SECRET_KEY = 'django-insecure-knd^!=%1u*z+!7l6z%i5x@h-9u6*pq^%v@rj(kwf_44k2l9-5v
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['pf.shinychu.com', 'localhost', '127.0.0.1', '*']
+ALLOWED_HOSTS = ['pf.shinychu.com', 'https://shinychu-pf.onrender.com', 'localhost', '127.0.0.1', '*']
+CSRF_TRUSTED_ORIGINS = [
+    'https://pf.shinychu.com',
+    'https://shinychu-pf.onrender.com',
+]
 
 
 # Application definition
