@@ -9,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-knd^!=%1u*z+!7l6z%i5x@h-9u6*pq^%v@rj(kwf_44k2l9-5v'
 
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['pf.shinychu.com', 'https://shinychu-pf.onrender.com', 'localhost', '127.0.0.1', '*']
 
